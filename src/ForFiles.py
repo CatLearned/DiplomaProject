@@ -2,40 +2,62 @@ import numpy as np
 from numpy import genfromtxt
 import matplotlib.pyplot as plt
 from pylab import arange, fft
-from scipy.fftpack import fftfreq, irfft, rfft
+from scipy.signal import lfilter, butter
 
-CURRENT_CHANNEL = 7
+CURRENT_CHANNEL = 11                                                      # Muse (1-5), Other (1 - ???)
+FS = 128                                                                 # 256 - MUSE, 128 - Other
 
-my_data = genfromtxt('C:\\ssvep1_eeg_.csv', delimiter=',', skip_header=True)
+my_data = genfromtxt('Files\\ssvep1_eeg_.csv', delimiter=',', skip_header=True)
 my_data = my_data.transpose()
-print(my_data)
 
-first = 1000
-last = 1280
-# last = len(my_data[CURRENT_CHANNEL])
+b, a = butter(3, 0.9)                                                    # Параметры для фильтра
 
-x = arange(last - first)
-y = my_data[CURRENT_CHANNEL]-np.average(my_data[CURRENT_CHANNEL])
-y = y[first:last]
+y_all = my_data[CURRENT_CHANNEL]                                         # Signal (Исходный)
+y_all = my_data[CURRENT_CHANNEL] - np.average(my_data[CURRENT_CHANNEL])  # Signal (Усреднённый), для Muse не нужен
+y_all = lfilter(b, a, y_all)                                             # Фильтрация сигнала, для Muse не нужна
+first = 0
 
-plt.xlabel('Frequency ($Hz$)')
-plt.ylabel('Amplitude ($Unit$)')
 
-Fs = 128
-n = len(y)  # length of the signal
-k = arange(n)
-T = n / Fs
+#last = first + FS
+last = len(my_data[CURRENT_CHANNEL])
 
-frq = k / T  # two sides frequency range
-frq = frq[range(int(n / 2))]  # one side frequency range
-Y = fft(y) / n  # fft computing and normalization
-Y = Y[range(int(n / 2))]
+while (True):
+    x = arange(last - first)
+    #y = my_data[CURRENT_CHANNEL]-np.average(my_data[CURRENT_CHANNEL])
+    y = y_all[first:last]
 
-plt.subplot(2,1,2)
-plt.plot(frq, abs(Y), 'r')
-plt.subplot(2,1,1)
-plt.plot(x, y)
-plt.show()
+    plt.xlabel('Frequency ($Hz$)')
+    plt.ylabel('Amplitude ($Unit$)')
+
+
+    n = len(y)  # length of the signal
+    k = arange(n)
+    T = n / FS
+
+
+    fourier = abs(np.fft.fft(y))
+    n = y.size
+    timestep = 1/FS
+    freq = np.fft.fftfreq(n, d=timestep)
+
+#Ytest = fftfreq(y)
+#print (freq)
+#print (fourier)
+
+    frq = k / T  # two sides frequency range
+    frq = frq[range(int(n / 2))]  # one side frequency range
+    Y = fft(y) / n  # fft computing and normalization
+    Y = Y[range(int(n / 2))]
+
+    plt.subplot(3, 1, 1)
+    plt.plot(x, y)
+    plt.subplot(3, 1, 2)
+    plt.plot(frq, abs(Y), 'r')
+    plt.subplot(3, 1, 3)
+    plt.plot(freq, fourier, 'r')
+    plt.show()
+    first = first + FS
+    last = last + FS
 
 
 
