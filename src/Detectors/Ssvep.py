@@ -4,6 +4,8 @@ from pylab import arange, fft
 import numpy as np
 from collections import deque
 import time
+from numpy import genfromtxt
+my_data = genfromtxt('my_file.csv', delimiter=',')
 
 
 class FastFourierTransform (Observer):
