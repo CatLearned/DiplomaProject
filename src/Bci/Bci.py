@@ -6,7 +6,7 @@ import time
 
 TIMEOUT = 2
 EPOCH_LENGTH = 1
-OVERLAP_LENGTH = 0#0.8
+OVERLAP_LENGTH = 0.5#0.8
 SHIFT_LENGTH = EPOCH_LENGTH - OVERLAP_LENGTH
 
 
@@ -39,7 +39,7 @@ class BciThread (threading.Thread):
         self.__work = True
         while self.__work:
             eeg_data, timestamp = self.__inlet.pull_chunk(timeout=1, max_samples=int(SHIFT_LENGTH * self.__fs))
-            info = np.column_stack((timestamp, eeg_data)).transpose()
+            info = np.column_stack((timestamp, eeg_data))#.transpose()
             self.event(info)
 
     def get_fs(self):

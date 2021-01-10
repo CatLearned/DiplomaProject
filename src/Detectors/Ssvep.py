@@ -5,7 +5,6 @@ import numpy as np
 from collections import deque
 import time
 from numpy import genfromtxt
-my_data = genfromtxt('my_file.csv', delimiter=',')
 
 
 class FastFourierTransform (Observer):
@@ -20,6 +19,7 @@ class FastFourierTransform (Observer):
         #plt.plot(frq, res1, 'r')
 
     def update_data(self, data):
+        data = data.transpose()
         for x in data[1]:
             self.__queue1.append(x)
         data1 = self.__queue1.copy()

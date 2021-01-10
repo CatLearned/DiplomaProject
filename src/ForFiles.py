@@ -4,22 +4,37 @@ import matplotlib.pyplot as plt
 from pylab import arange, fft
 from scipy.signal import lfilter, butter
 
-CURRENT_CHANNEL = 11                                                      # Muse (1-5), Other (1 - ???)
-FS = 128                                                                 # 256 - MUSE, 128 - Other
 
-my_data = genfromtxt('Files\\ssvep1_eeg_.csv', delimiter=',', skip_header=True)
+def butter_bandpass(lowcut, highcut, fs, order=3): # 3 ten sonra lfilter NaN degerler vermeye basliyor
+    nyq = 0.5 * fs
+    low = lowcut / nyq
+    high = highcut / nyq
+    return butter(order, [low, high], btype='band', analog=False)
+
+def butter_lowpass(cutoff, fs, order=3):
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    return b, a
+
+
+CURRENT_CHANNEL = 3                                                      # Muse (1-5), Other (9-12) 11 = o2
+FS = 256                                                                 # 256 - MUSE, 128 - Other
+
+#my_data = genfromtxt('Files\\subject2\\ssvep10012_30hz_eeg_.csv', delimiter=',', skip_header=True)
+my_data = genfromtxt('Files\\Exp1_time1610305066.3049798.csv', delimiter=',', skip_header=True)
 my_data = my_data.transpose()
 
-b, a = butter(3, 0.9)                                                    # Параметры для фильтра
+#b, a = butter_lowpass(50, FS, 8)#butter(3, 0.1)                                                    # Параметры для фильтра
 
 y_all = my_data[CURRENT_CHANNEL]                                         # Signal (Исходный)
 y_all = my_data[CURRENT_CHANNEL] - np.average(my_data[CURRENT_CHANNEL])  # Signal (Усреднённый), для Muse не нужен
-y_all = lfilter(b, a, y_all)                                             # Фильтрация сигнала, для Muse не нужна
+#y_all = lfilter(b, a, y_all)                                             # Фильтрация сигнала, для Muse не нужна
 first = 0
 
 
-#last = first + FS
-last = len(my_data[CURRENT_CHANNEL])
+last = first + 512 #FS
+# #last = len(my_data[CURRENT_CHANNEL])
 
 while (True):
     x = arange(last - first)
