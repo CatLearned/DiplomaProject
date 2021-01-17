@@ -39,7 +39,7 @@ class BciThread (threading.Thread):
         self.__work = True
         while self.__work:
             eeg_data, timestamp = self.__inlet.pull_chunk(timeout=1, max_samples=int(SHIFT_LENGTH * self.__fs))
-            info = np.column_stack((timestamp, eeg_data))#.transpose()
+            info = np.column_stack((timestamp, eeg_data))
             self.event(info)
 
     def get_fs(self):
